@@ -1,0 +1,51 @@
+Workflow notes:
+
+1. Create Apps - manage.py(@petstagram) startapp :
+    - accounts
+    - common
+    - pets
+    - photos
+
+2. Move new apps to main app 'petstagram' and keep references
+
+3. Create and register urls for each app
+    3.1. Create 'APP_NAME/urls.py' with empty urlpatterns = []
+    3.2. Include 'APP_NAME/urls.py' into project's urls.py
+    3.3. Add 'APP_NAME' to 'INSTALLED_APPS' in settings.py
+
+4. Use provided templates and staticfiles
+    - Extract files
+    - Group the templates in the main template folder into grouped template folders
+    - ?Staticfiles
+
+5. Create views for each template group (check step 8):
+    - render request for each template
+
+6. Add URLs for each view as specified
+
+7. Check URLS if they render correct template
+
+8. Repeat steps 5, 6, 7 for each group
+
+9. Add static files (images, css) to the html, so it looks like a website
+    - Add folder named 'staticfiles', next to folder 'templates'
+    - Add 'STATICFILES_DIRS = (BASE_DIR / 'staticfiles') to settings.py, because default folder is called only 'static',
+    so it redirects to 'staticfiles' and keeps the adress to 'static'
+
+10. (optional) If we explore the HTML pages, we can see a lot of repeating code (mainly in header),
+so we can make a base template and inherit it where repeating.
+    - Identify repeating code (header & footer)
+    - Isolate it in 'base.html'
+    - Remove and inherit where applicable (everywhere)
+    - (Important!) check all pages if they show correctly
+
+11. Fix static links (if we did it in 10. it should be relatively easier)
+    - Also make it dynamic using "{% static '...path...' %}"
+    - Fix all pages with leftover static links
+
+12. Fix site navigation
+    - To 'base' folder add 'partials' folder and 'nav.html' file in it
+    - (Optional) {% include 'base/partials/nav.html' %} to 'nav-links' class in 'base.html' and
+    make it as partial insert into 'nav.html'
+    - Fix navigation urls (use the named urls!) in the partials file
+    - Fix navigation urls in all remaining html's
