@@ -31,9 +31,9 @@
         <!-- End User Details and Image Location -->
     </div>
     <!-- Post image -->
-    <div class="imgBx">
+    <div class="imgBx" id="{{ photo_object.id }}">
 {#        <img src="{% static '/images/axolotl.jpeg' %}" alt="post" class="cover">#}
-        <img src="{% static photo_object.photo %}" alt="post" class="cover">
+        <img src="{{ photo_object.photo.url }}" alt="post" class="cover">
     </div>
     <!-- End Post image -->
 
@@ -137,10 +137,12 @@
                     <i class="far fa-smile"></i>
                 </h3>
             </div>
-            <form method="post" action="add comment">
-                <label for="id_body">Body:</label>
-                <textarea name="body" cols="40" rows="10" placeholder="Add comment..." maxlength="300"
-                          required="" id="id_body"></textarea>
+            <form method="post" action="{% url 'add comment' photo_id=photo_object.id %}">
+                {% csrf_token %}
+                {{ photo_comment_form }}
+{#                <label for="id_body">Body:</label>#}
+{#                <textarea name="body" cols="40" rows="10" placeholder="Add comment..." maxlength="300"#}
+{#                          required="" id="id_body"></textarea>#}
                 <button type="submit">Post</button>
             </form>
         </div>

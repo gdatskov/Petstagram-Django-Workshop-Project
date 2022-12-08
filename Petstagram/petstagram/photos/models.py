@@ -18,7 +18,7 @@ class Photo(models.Model):
         null=False,
         blank=False,
         validators=([custom_validators.MaxSizeValidator(5)]),
-        upload_to='mediafiles/pet_photos'
+        upload_to='pet_photos/'
     )
 
     photo_description = models.CharField(
