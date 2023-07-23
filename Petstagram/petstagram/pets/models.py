@@ -1,5 +1,8 @@
+from django.contrib.auth import get_user_model
 from django.db import models
 from django.utils.text import slugify
+
+UserModel = get_user_model()
 
 
 class Pet(models.Model):
@@ -22,6 +25,10 @@ class Pet(models.Model):
         blank=True,
         null=False,
         editable=False,
+    )
+    pet_user = models.ForeignKey(
+        to=UserModel,
+        on_delete=models.RESTRICT
     )
 
     # modify built-in save() in django ORM

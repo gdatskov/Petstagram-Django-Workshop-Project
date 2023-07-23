@@ -2,7 +2,7 @@
 {% load static %}
 
 {% block content %}
-        <div class="container">
+    <div class="container">
         <div class="col-9">
 
             <!-- Start Pet Photo Post Section -->
@@ -13,7 +13,7 @@
                     <div class="userDetails">
 
                         <!-- Link to User Profile Details Page-->
-                        <a href="#">
+                        <a href="{% url 'profile details' pk=photo.photo_user_id %}">
                             <div class="profilepic">
                                 <div class="profile_img">
                                     <div class="image">
@@ -25,68 +25,68 @@
                         <h3>
 
                             <!-- Link to User Profile Details Page -->
-                            <a href="#">
+                            <a href="{% url 'profile details' pk=photo.photo_user_id %}">
                                 <!-- IF user has first name and last name -->
-                                Diyan Kalaydzhiev
-                                <!-- else -->
-                                <!-- show user username -->
+                                {# Diyan Kalaydzhiev #}
+                                {% if photo.photo_user.get_full_name %}
+                                    {{ photo.photo_user.get_full_name }}
+                                    <!-- else -->
+                                {% else %}
+                                    <!-- show user username -->
+                                    {{ photo.photo_user.username }}
+                                {% endif %}
                             </a>
                             <br>
                             {% if photo.photo_location %}
-                            <!-- IF the photo has location -->
-                            <span>{{ photo.photo_location }}</span>
+                                <!-- IF the photo has location -->
+                                <span>{{ photo.photo_location }}</span>
                             {% endif %}
 
                             <!-- IF the viewer is the creator of the photo -->
+                            {% if is_owner %}
                                 <div class="edit-delete-btns">
-
                                     <!-- Link to Edit Pet Photo Page -->
                                     <a href="{% url 'edit photo' photo.id %}">
                                         <img class="edit-img" src="{% static '/images/edit-pen-icon-6.jpg' %}"
                                              alt="edit button">
                                     </a>
-
                                     <!-- Link to Delete Pet Photo Page -->
                                     <a href="{% url 'delete photo' photo.id %}">
-                                        <img class="bin-img" src="{% static '/images/icon-remove-22.jpg' %}" alt="bin button">
+                                        <img class="bin-img" src="{% static '/images/icon-remove-22.jpg' %}"
+                                             alt="bin button">
                                     </a>
                                 </div>
-                            <!-- End IF the viewer is the creator of the photo -->
-
+                                <!-- End IF the viewer is the creator of the photo -->
+                            {% endif %}
                         </h3>
                     </div>
                     <!-- End User Details and Image Location Section -->
-
                 </div>
 
                 <!-- Start Pet Photo -->
                 <div class="imgBx" id={{ photo.id }}>
                     <!-- Pet Photo -->
-                    <img src="{{ photo.photo.url }}" alt="post" class="cover">
+                    <img src="{{ photo.photo.url }}" alt="{{ photo.photo_description }}" class="cover">
                 </div>
                 <!-- End Pet Photo -->
 
                 <div class="bottom">
-
                     <!-- Start Like and Share Buttons Section -->
                     <div class="actionBtns">
                         <div class="left">
-
                             <!-- Start Like Button -->
                             <span class="heart">
-
                                     <!-- Link to Like Path -->
 									<a href="{% url 'like photo' photo.id %}">
-
-                                        {% if photo.photolike_set.all %}
-										<!-- IF user has liked the photo -->
-                                        <svg style="color: red"
-                                             xmlns="http://www.w3.org/2000/svg"
-                                             width="24"
-                                             height="24"
-                                             fill="currentColor"
-                                             class="bi bi-heart-fill"
-                                             viewBox="0 0 16 16">
+                                        {% if user_liked_the_photo %}
+                                            <!-- IF user has liked the photo -->
+                                            <svg style="color: red"
+                                                 xmlns="http://www.w3.org/2000/svg"
+                                                 width="24"
+                                                 height="24"
+                                                 fill="currentColor"
+                                                 class="bi bi-heart-fill"
+                                                 viewBox="0 0 16 16">
                                             <!-- Coordinate path -->
                                             <path fill-rule="evenodd"
                                                   d="M8 1.314C12.438-3.248 23.534 4.735
@@ -95,14 +95,14 @@
                                             </path>
                                         </svg>
                                         {% else %}
-                                        <!-- IF NOT user has liked the photo -->
-                                        <svg aria-label="Like"
-                                             color="#262626"
-                                             fill="#262626"
-                                             height="24"
-                                             role="img"
-                                             viewBox="0 0 48 48"
-                                             width="24">
+                                            <!-- IF NOT user has liked the photo -->
+                                            <svg aria-label="Like"
+                                                 color="#262626"
+                                                 fill="#262626"
+                                                 height="24"
+                                                 role="img"
+                                                 viewBox="0 0 48 48"
+                                                 width="24">
                                         <!-- Coordinate path -->
                                         <path d="M34.6 6.1c5.7 0 10.4 5.2 10.4
                                                     11.5 0 6.8-5.9 11-11.5 16S25 41.3 24
@@ -143,12 +143,11 @@
                     <!-- End Like and Share Buttons Section -->
 
                     <!-- Number of Likes for the Photo -->
-                    <p class="likes">{{ photo.photolike_set.count }}</p>
+                    <p class="likes">Likes: {{ photo.photolike_set.count }}</p>
 
                     <!-- Start Tagged Pets Section-->
-                            <!-- TODO: Fix username when auth is ready -->
                     {% for tagged_pet in photo.photo_tagged_pets.all %}
-                        <a href="{% url 'pet details' 'username' tagged_pet.pet_slug %}">
+                        <a href="{% url 'pet details' username=tagged_pet.pet_user.username pet_slug=tagged_pet.pet_slug %}">
                             <p class="message">
                                 <b>{{ tagged_pet.name }}</b>
                             </p>
@@ -161,36 +160,35 @@
 
                     <!-- Date of Publication or edit of the Photo -->
                     <h5 class="postTime">{{ photo.photo_publish_date }}</h5>
+
                     <!-- Start Comments Section -->
                     {% for comment in photo.photocomment_set.all %}
-                    <div class="comments">
-                        <div class="top">
-                            <div class="userDetails">
-                                <div class="comment-data">
-                                    <div class="profilepic">
-                                        <div class="profile_img">
-                                            <div class="image">
-                                                <!-- User Profile Image -->
-                                                <img src="{% static '/images/person.png' %}" alt="img8">
-                                                <!-- TODO: Fix username when auth is ready -->
+                        <div class="comments">
+                            <div class="top">
+                                <div class="userDetails">
+                                    <div class="comment-data">
+                                        <div class="profilepic">
+                                            <div class="profile_img">
+                                                <div class="image">
+                                                    <!-- User Profile Image -->
+                                                    <img src="{% static '/images/person.png' %}" alt="img8">
 
+                                                </div>
                                             </div>
                                         </div>
-                                    </div>
-                                    <p>
-                                        <!-- Link to User Profile Details Page-->
-                                        <!-- User First and/or Last Name or username-->
-                                        <a href="">Steven Ivanov</a>
-                                        <!-- TODO: Fix username when auth is ready -->
+                                        <p>
+                                            <!-- Link to User Profile Details Page-->
+                                            <!-- User First and/or Last Name or username-->
+                                            <a href="">Steven Ivanov</a>
 
-                                        <!-- User Comment -->
-                                        - {{ comment.comment_text }}
-                                    </p>
+                                            <!-- User Comment -->
+                                            - {{ comment.comment_text }}
+                                        </p>
+                                    </div>
+                                    <span>{{ comment.comment_publish_date_time }}</span>
                                 </div>
-                                <span>{{ comment.comment_publish_date_time }}</span>
                             </div>
                         </div>
-                    </div>
                     {% endfor %}
                     <!-- End Comments Section -->
                 </div>
@@ -204,7 +202,7 @@
                     </div>
 
                     <!-- Start Add Comments Form -->
-                    <form method="post" action="{% url 'add comment' photo_id=photo.id%}">
+                    <form method="post" action="{% url 'add comment' photo_id=photo.id %}">
                         {% csrf_token %}
                         {{ photo_comment_form }}
                         <!-- Post Comments Button -->

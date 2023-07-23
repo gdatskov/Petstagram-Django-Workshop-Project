@@ -2,6 +2,11 @@ from django.core.exceptions import ValidationError
 from django.utils.deconstruct import deconstructible
 
 
+def string_is_alpha(value: str):
+    if not value.isalpha():
+        raise ValidationError("Entered value does not contain only alphabetical letters.")
+
+
 def validate_max_file_size_mb(image, size):
     size_in_bytes = size * 1024 ** 2
     if image.size > size_in_bytes:

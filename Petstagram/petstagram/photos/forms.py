@@ -7,7 +7,7 @@ class PhotoForm(forms.ModelForm):
     class Meta:
         model = Photo
         fields = '__all__'
-        # exclude = ['photo_publish_date']
+        exclude = ['photo_publish_date', 'photo_user']
         # fields = ['photo', 'photo_description', 'photo_location', 'photo_tagged_pets']
         labels = {
             'photo': 'Photo file',

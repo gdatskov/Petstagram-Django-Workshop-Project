@@ -1,3 +1,4 @@
+from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect, resolve_url
 from django.urls import reverse
 from django.views.decorators.csrf import csrf_protect
@@ -14,33 +15,66 @@ def index(request):
     all_photo_objects = Photo.objects.all()
     search_form = SearchForm()
 
+    photos_liked_by_user = PhotoLike.objects.filter(like_user_id=request.user.pk).all()\
+        .values_list('related_photo_id', flat=True)
+
+
     if request.method == 'POST':
         search_form = SearchForm(request.POST)
         if search_form.is_valid():
             search_pattern = search_form.cleaned_data['pet_name']
             all_photo_objects = all_photo_objects.filter(photo_tagged_pets__name__icontains=search_pattern)
 
+    # photo_user_id = all_photo_objects.filter(photo_user=)
+
     context = {
         'all_photo_objects': all_photo_objects,
         'photo_comment_form': AddCommentForm(),
         'search_form': search_form,
+        'photos_liked_by_user': photos_liked_by_user,
+
     }
 
     return render(request, template_name='common/home-page.html', context=context)
 
 
-def like_photo(request, photo_id):
-    photo = Photo.objects.get(id=photo_id)
-    liked_object = PhotoLike.objects.filter(related_photo_id=photo_id).first()
+# def like_photo(request, photo_id):
+#     photo = Photo.objects.get(id=photo_id)
+#     liked_object = PhotoLike.objects.filter(related_photo_id=photo_id).first()
+#
+#     if liked_object:
+#         liked_object.delete()
+#     else:
+#         # save() is used for creation/update
+#         # PhotoLike(related_photo=photo).save()
+#
+#         # Or If it only has to be created:
+#         PhotoLike.objects.create(related_photo=photo)
+#
+#     return redirect(get_photo_url(request, photo_id))
 
-    if liked_object:
-        liked_object.delete()
+@login_required
+def like_photo(request, photo_id):
+
+    photo = Photo.objects.filter(
+        id=photo_id,
+    ).get()
+
+    liked_object = PhotoLike.objects.filter(related_photo_id=photo_id)
+
+    user_liked_the_photo = liked_object.filter(like_user_id=request.user.pk)
+
+    if user_liked_the_photo:
+        user_liked_the_photo.delete()
     else:
         # save() is used for creation/update
         # PhotoLike(related_photo=photo).save()
 
         # Or If it only has to be created:
-        PhotoLike.objects.create(related_photo=photo)
+        PhotoLike.objects.create(
+            related_photo=photo,
+            like_user_id=request.user.pk
+        )
 
     return redirect(get_photo_url(request, photo_id))
 
