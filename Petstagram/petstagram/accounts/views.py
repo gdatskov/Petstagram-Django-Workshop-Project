@@ -1,8 +1,9 @@
-from django.contrib.auth import get_user_model
-from django.contrib.auth import views as auth_views# LoginView, LogoutView
+from django.contrib.auth import get_user_model, login
+from django.contrib.auth import views as auth_views  # LoginView, LogoutView
+from django.core.paginator import Paginator
 from django.shortcuts import render
 from django.urls import reverse_lazy
-from django.views import generic as generic_views # CreateView, DetailView, UpdateView
+from django.views import generic as generic_views  # CreateView, DetailView, UpdateView
 
 from petstagram.accounts.forms import RegisterForm, EditForm
 from petstagram.accounts.models import Gender
@@ -22,6 +23,12 @@ class Register(generic_views.CreateView):
     form_class = RegisterForm
     success_url = reverse_lazy('index')
 
+    # Automatically login after registration
+    def post(self, request, *args, **kwargs):
+        response = super().post(request, *args, **kwargs)
+        login(request, self.object)     # Login before redirecting
+        return response
+
 
 class LogOut(auth_views.LogoutView):
     next_page = reverse_lazy('index')
@@ -30,6 +37,16 @@ class LogOut(auth_views.LogoutView):
 class ProfileDetails(generic_views.DetailView):
     template_name = 'accounts/profile-details-page.html'
     model = UserModel
+    photos_paginate_by = 3
+
+    def get_photos_page(self):
+        return self.request.GET.get('page', default=1)
+
+    def get_paginated_photos(self):
+        page = self.get_photos_page()
+        photos = self.object.photo_set.all()
+        paginator = Paginator(photos, self.photos_paginate_by)
+        return paginator.get_page(page)
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -42,6 +59,9 @@ class ProfileDetails(generic_views.DetailView):
         context['user_total_likes_count'] = self.object.photolike_set.filter(like_user_id=self.object.id).count()
         context['user_total_photos_count'] = self.object.photo_set.filter(photo_user_id=self.object.id).count()
 
+        # context['user_last_uploaded_photos'] = self.object.photo_set.all()
+
+        context['user_photos'] = self.get_paginated_photos()
 
         return context
 
@@ -59,13 +79,13 @@ class EditProfile(generic_views.UpdateView):
         # return reverse_lazy('index')
 
 
+
 class DeleteProfile(generic_views.DeleteView):
     model = UserModel
     template_name = 'accounts/profile-delete-page.html'
 
     def get_success_url(self):
         return reverse_lazy('index')
-
 
 #
 # def profile_delete(request, pk):

@@ -4,6 +4,7 @@ from django.urls import path
 
 from petstagram.common.forms import AddCommentForm
 from petstagram.common.models import PhotoLike
+from petstagram.pets.utils import is_owner
 from petstagram.photos.forms import AddPhotoForm, EditPhotoForm
 from petstagram.photos.models import Photo
 
@@ -49,6 +50,10 @@ def photo_details(request, pk):
 
 def photo_edit(request, pk):
     photo = Photo.objects.get(id=pk)
+
+    # url tampering defence
+    if not is_owner(request, photo.photo_user):
+        return redirect('photo details', pk=photo.id)
 
     if request.method == 'GET':
         form = EditPhotoForm(instance=photo)

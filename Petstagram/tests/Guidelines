@@ -1,0 +1,13 @@
+1. Make 'tests' package (directory with __init__ file)
+2. Make packages for each app, e.g. 'accounts', 'common', etc...
+3. Make packages for each python file that makes sence to make tests for, e.g. 'views', 'custom_validators', 'utils', etc...
+4. Check run configuration (python, env)
+5. Import app and files into the packages init file, e.g.:
+    - In 'tests/__init.py__':
+        from .accounts import *
+    - In 'tests/accounts/__init.py__':
+        from .views import *
+    - In 'tests/accounts/views/__init.py__':
+        from .register_view_tests import *
+6. Make a description what to test
+7. Write tests

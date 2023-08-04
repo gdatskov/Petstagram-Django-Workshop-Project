@@ -11,3 +11,5 @@ urlpatterns = [
         path('delete/', views.DeleteProfile.as_view(), name='delete profile')
     ])),
 ]
+
+import petstagram.accounts.signals

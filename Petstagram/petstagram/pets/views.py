@@ -18,7 +18,8 @@ def pet_add(request):
             pet = form.save(commit=False)
             pet.pet_user = request.user
             pet.save()
-            return redirect('profile details', pk=pet.pet_user.pk)
+            # return redirect('profile details', pk=pet.pet_user.pk)
+            return redirect('pet details', username=pet.pet_user.username, pet_slug=pet.pet_slug)
 
     context = {'add_pet_form': form}
 
@@ -26,6 +27,7 @@ def pet_add(request):
 
 
 def pet_details(request, username, pet_slug):
+    tagged_pet_photo_objects = Photo.objects.filter(photo_tagged_pets__pet_slug=pet_slug).all()
     pet = get_pet_by_slug_and_username(pet_slug, username)
     tagged_photos = pet.photo_set.all()
     tagged_photos_count = tagged_photos.count()
@@ -37,6 +39,7 @@ def pet_details(request, username, pet_slug):
         'tagged_photos': tagged_photos,
         'photo_comment_form': AddCommentForm(),
         'is_owner': pet.pet_user == request.user,
+        'all_photo_objects': tagged_pet_photo_objects,
     }
     return render(request, template_name='pets/pet-details-page.html', context=context)
 
@@ -55,11 +58,12 @@ def pet_delete(request, username, pet_slug):
 
 
 def pet_edit(request, username, pet_slug):
+    print(username)
     pet = get_pet_by_slug_and_username(pet_slug, username)
 
     # url tampering defence
-    if not is_owner(request, pet):
-        return render(request, template_name='pets/pet-edit-page.html')  # or redirect anywhere else
+    if not is_owner(request, pet.pet_user):
+        return redirect('pet details', username=username, pet_slug=pet_slug)  # or redirect anywhere else
 
     if request.method == 'GET':
         form = EditPetForm(instance=pet)

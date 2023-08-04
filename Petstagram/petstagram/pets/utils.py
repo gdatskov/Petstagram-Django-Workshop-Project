@@ -9,8 +9,8 @@ def get_pet_by_slug_and_username(slug, username):
 
 
 # Anti-URL-tampering (function-based-views)
-def is_owner(request, obj):
-    return request.user == obj.user
+def is_owner(request, user):
+    return request.user == user
 
 
 # Anti-URL-tampering (class-based-views)
